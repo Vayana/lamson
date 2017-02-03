@@ -21,10 +21,13 @@ def undeliverable_message(raw_message, failure_type):
     into the routing.Router.UNDELIVERABLE_QUEUE (if it's set).
     """
     if routing.Router.UNDELIVERABLE_QUEUE:
-        key = routing.Router.UNDELIVERABLE_QUEUE.push(raw_message)
+        # Not pushing to undeliverable queue
+        # key = routing.Router.UNDELIVERABLE_QUEUE.push(raw_message)
 
-        logging.error("Failed to deliver message because of %r, put it in "
-                      "undeliverable queue with key %r", failure_type, key)
+        # logging.error("Failed to deliver message because of %r, put it in "
+        #               "undeliverable queue with key %r", failure_type, key)
+        logging.error("Failed to deliver message because of %r, "
+                      "IGNORING and Not pushing to undeliverable queue", failure_type)
 
 class SMTPError(Exception):
     """

@@ -220,6 +220,7 @@ class RoutingBase(object):
         self.RELOAD = False
         self.LOG_EXCEPTIONS = True
         self.UNDELIVERABLE_QUEUE = None
+        self.VALID_TO_EMAILS_FOR_UNDELIVERABLE_QUEUE = set()
         self.lock = threading.RLock()
         self.call_lock = threading.RLock()
 
@@ -318,9 +319,13 @@ class RoutingBase(object):
 
     def _enqueue_undeliverable(self, message):
         if self.UNDELIVERABLE_QUEUE:
-            LOG.debug("Message to %r from %r undeliverable, putting in undeliverable queue (# of recipients: %d).",
-                      message.route_to, message.route_from, len(message.route_to))
-            self.UNDELIVERABLE_QUEUE.push(message)
+            if message.route_to & self.VALID_TO_EMAILS_FOR_UNDELIVERABLE_QUEUE:
+                LOG.debug("Message to %r from %r undeliverable, putting in undeliverable queue (# of recipients: %d).",
+                          message.route_to, message.route_from, len(message.route_to))
+                self.UNDELIVERABLE_QUEUE.push(message)
+            else:
+                LOG.debug("Message to %r from %r undeliverable, IGNORING",
+                          message.route_to, message.route_from)
         else:
             LOG.debug("Message to %r from %r didn't match any handlers. (# recipients: %d)",
                       message.route_to, message.route_from, len(message.route_to))
